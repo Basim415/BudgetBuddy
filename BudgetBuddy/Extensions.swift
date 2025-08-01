@@ -31,3 +31,13 @@ extension String {
         
     }
 }
+
+extension String {
+    func toMonthYearDate() -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX") // Make sure it's in English
+        formatter.dateFormat = "LLLL yyyy" // Match `.month(.wide)` = full month name
+        return formatter.date(from: self)
+    }
+}
+

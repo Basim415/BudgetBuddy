@@ -1,20 +1,24 @@
 import Foundation
 import SwiftUI
 
-var transactionPreviewData = Transaction(
-    id: 1,
-    date: "07/18/2025",
-    institution: "Chase",
-    account: "Chase Visa",
-    merchant: "Apple",
-    amount: 11.49,                      
-    type: .debit,
-    categoryId: 801,
-    category: "Software",
-    isPending: false,
-    isTransfer: false,
-    isExpense: true,
-    isEdited: false
-)
+var transactionListPreviewData: [Transaction] = {
+    guard let url = Bundle.main.url(forResource: "transactions", withExtension: "json") else {
+        print("transactions.json not found in bundle.")
+        return []
+    }
 
-var transactionListPreviewData = [Transaction](repeating: transactionPreviewData, count: 10)
+    guard let data = try? Data(contentsOf: url) else {
+        print("Failed to load data from transactions.json.")
+        return []
+    }
+
+    do {
+        let transactions = try JSONDecoder().decode([Transaction].self, from: data)
+        print("Successfully decoded \(transactions.count) transactions.")
+        return transactions
+    } catch {
+        print("Decoding error: \(error)")
+        return []
+    }
+}()
+
