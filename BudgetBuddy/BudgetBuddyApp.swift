@@ -13,8 +13,9 @@ struct BudgetBuddyApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LaunchView()
                 .environmentObject(transactionListVM)
         }
     }
 }
+

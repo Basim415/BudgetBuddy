@@ -9,9 +9,10 @@ import Foundation
 import SwiftUI
 
 extension Color {
-    static let appBackground = Color("AppBackground")
-    static let appIcon = Color("AppIcon")
-    static let appText = Color("AppText")
+    static let appBackground = Color("Background")
+    static let appIcon = Color("Icon")
+    static let appText = Color("Text")
+    static let systemBackground = Color(uiColor: .systemBackground)
 }
 
 extension DateFormatter {
@@ -41,3 +42,8 @@ extension String {
     }
 }
 
+extension Double {
+    func roundedTo2Digits() -> Double {
+        return (self * 100).rounded() / 100
+    }
+}

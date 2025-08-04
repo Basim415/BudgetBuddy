@@ -15,7 +15,7 @@
 		CD39BED62E3C69740015930B /* HeapModule in Frameworks */ = {isa = PBXBuildFile; productRef = CD39BED52E3C69740015930B /* HeapModule */; };
 		CD39BED82E3C69740015930B /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = CD39BED72E3C69740015930B /* OrderedCollections */; };
 		CD39BEDA2E3C69740015930B /* _RopeModule in Frameworks */ = {isa = PBXBuildFile; productRef = CD39BED92E3C69740015930B /* _RopeModule */; };
-		CD39BEDD2E3C6A8C0015930B /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = CD39BEDC2E3C6A8C0015930B /* SwiftUICharts */; };
+		CDD5E2622E416F920004CA06 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = CDD5E2612E416F920004CA06 /* SwiftUICharts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD39BEDD2E3C6A8C0015930B /* SwiftUICharts in Frameworks */,
+				CDD5E2622E416F920004CA06 /* SwiftUICharts in Frameworks */,
 				CD39BED42E3C69740015930B /* HashTreeCollections in Frameworks */,
 				CD39BED02E3C69740015930B /* Collections in Frameworks */,
 				CD39BED22E3C69740015930B /* DequeModule in Frameworks */,
@@ -141,7 +141,7 @@
 				CD39BED52E3C69740015930B /* HeapModule */,
 				CD39BED72E3C69740015930B /* OrderedCollections */,
 				CD39BED92E3C69740015930B /* _RopeModule */,
-				CD39BEDC2E3C6A8C0015930B /* SwiftUICharts */,
+				CDD5E2612E416F920004CA06 /* SwiftUICharts */,
 			);
 			productName = BudgetBuddy;
 			productReference = CD385E652DDB215000AF81E6 /* BudgetBuddy.app */;
@@ -228,7 +228,7 @@
 			packageReferences = (
 				CD39BEBA2E3AE58D0015930B /* XCRemoteSwiftPackageReference "SwiftUIFontIcon" */,
 				CD39BECC2E3C694F0015930B /* XCRemoteSwiftPackageReference "swift-collections" */,
-				CD39BEDB2E3C6A8C0015930B /* XCRemoteSwiftPackageReference "ChartView" */,
+				CDD5E2602E416F920004CA06 /* XCRemoteSwiftPackageReference "ChartView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CD385E662DDB215000AF81E6 /* Products */;
@@ -605,12 +605,12 @@
 				minimumVersion = 1.2.1;
 			};
 		};
-		CD39BEDB2E3C6A8C0015930B /* XCRemoteSwiftPackageReference "ChartView" */ = {
+		CDD5E2602E416F920004CA06 /* XCRemoteSwiftPackageReference "ChartView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AppPear/ChartView.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.5.5;
+				kind = exactVersion;
+				version = "2.0.0-beta.2";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -656,9 +656,9 @@
 			package = CD39BECC2E3C694F0015930B /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = _RopeModule;
 		};
-		CD39BEDC2E3C6A8C0015930B /* SwiftUICharts */ = {
+		CDD5E2612E416F920004CA06 /* SwiftUICharts */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CD39BEDB2E3C6A8C0015930B /* XCRemoteSwiftPackageReference "ChartView" */;
+			package = CDD5E2602E416F920004CA06 /* XCRemoteSwiftPackageReference "ChartView" */;
 			productName = SwiftUICharts;
 		};
 /* End XCSwiftPackageProductDependency section */

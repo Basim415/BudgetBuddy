@@ -11,9 +11,30 @@ import Collections
 
 
 typealias TransactionGroup = [String: [Transaction]]
+typealias TransactionPrefixSum = [(String, Double)]
 
 final class TransactionListViewModel: ObservableObject {
+    @Published var searchText: String = ""
+    @Published var selectedCategory: String? = nil
+    @Published var monthlyBudget: Double = 1500.0 // Adjustable by user later
     @Published var transactions: [Transaction] = []
+    
+    var filteredTransactions: [Transaction] {
+        transactions.filter { transaction in
+            // Filter by category if selected
+            let categoryMatch = selectedCategory == nil || transaction.category == selectedCategory
+            // Filter by search text if entered
+            let searchMatch = searchText.isEmpty || transaction.merchant.lowercased().contains(searchText.lowercased())
+            return categoryMatch && searchMatch
+        }
+    }
+    
+    var currentMonthExpenseTotal: Double {
+        let currentMonth = Date().formatted(.dateTime.year().month(.wide))
+        return transactions
+            .filter { $0.month == currentMonth && $0.isExpense }
+            .reduce(0) { $0 - $1.signedAmount }
+    }
 
     init() {
         getTransactions()
@@ -36,5 +57,28 @@ final class TransactionListViewModel: ObservableObject {
         let groupedTransactions = Dictionary(grouping: transactions) { $0.month }
         return groupedTransactions
     }
+    
+    func accumulateTransactions() -> TransactionPrefixSum {
+        guard !transactions.isEmpty else { return [] }
+
+        let calendar = Calendar.current
+        let groupedTransactions = Dictionary(grouping: transactions.filter { $0.isExpense }) {
+            calendar.startOfDay(for: $0.dateParsed)
+        }
+
+        let sortedDates = groupedTransactions.keys.sorted()
+        var sum: Double = .zero
+        var cumulativeSum: TransactionPrefixSum = []
+
+        for date in sortedDates {
+            let dailyTotal = groupedTransactions[date]?.reduce(0) { $0 - $1.signedAmount } ?? 0
+            sum += dailyTotal
+            sum = sum.roundedTo2Digits()
+            cumulativeSum.append((date.formatted(date: .abbreviated, time: .omitted), sum))
+        }
+
+        return cumulativeSum
+    }
+
 }
 

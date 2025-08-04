@@ -11,18 +11,16 @@ struct RecentTransactionList: View {
     @EnvironmentObject var transactionListVM: TransactionListViewModel
 
     var body: some View {
-        VStack {
+        VStack(spacing: 16) {
+            // MARK: Header
             HStack {
-                // MARK: Header Title
                 Text("Recent Transactions")
+                    .font(.headline)
                     .bold()
 
                 Spacer()
 
-                // MARK: Header Link
-                NavigationLink {
-                    TransactionList()
-                } label: {
+                NavigationLink(destination: TransactionList()) {
                     HStack(spacing: 4) {
                         Text("See All")
                         Image(systemName: "chevron.right")
@@ -31,20 +29,23 @@ struct RecentTransactionList: View {
                 }
             }
             .padding(.top)
-            
-            // MARK: Recent Transaction List
-            ForEach(Array(transactionListVM.transactions.prefix(5).enumerated()), id: \.element.id) { index, transaction in
-                TransactionRow(transaction: transaction)
 
-                if index < 4 {
+            // MARK: Recent Transaction Rows
+            let recentTransactions = Array(transactionListVM.transactions.prefix(5))
+
+            ForEach(recentTransactions.indices, id: \.self) { index in
+                TransactionRow(transaction: recentTransactions[index])
+
+                if index < recentTransactions.count - 1 {
                     Divider()
+                        .background(Color.appText.opacity(0.1))
                 }
             }
         }
         .padding()
         .background(Color.appBackground)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.primary.opacity(0.2), radius: 10, x: 0, y: 5)
+        .shadow(color: Color.primary.opacity(0.1), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -61,8 +62,8 @@ struct RecentTransactionList_Preview: PreviewProvider {
                 .environmentObject(transactionListVM)
 
             RecentTransactionList()
-                .preferredColorScheme(.dark)
                 .environmentObject(transactionListVM)
+                .preferredColorScheme(.dark)
         }
     }
 }
