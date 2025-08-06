@@ -8,15 +8,22 @@
 import Foundation
 import Combine
 import Collections
+import SwiftUI
+import SwiftUICharts
 
+enum ChartDisplayType: String, CaseIterable {
+    case line = "Line Chart"
+    case bar = "Bar Chart"
+}
 
 typealias TransactionGroup = [String: [Transaction]]
 typealias TransactionPrefixSum = [(String, Double)]
 
 final class TransactionListViewModel: ObservableObject {
+    @Published var chartType: ChartDisplayType = .line
     @Published var searchText: String = ""
     @Published var selectedCategory: String? = nil
-    @Published var monthlyBudget: Double = 1500.0 // Adjustable by user later
+    @AppStorage("monthlyBudget") var monthlyBudget: Double = 1500.0
     @Published var transactions: [Transaction] = []
     
     var filteredTransactions: [Transaction] {
@@ -79,6 +86,23 @@ final class TransactionListViewModel: ObservableObject {
 
         return cumulativeSum
     }
+    
+    func monthlyTotals() -> [(String, Double)] {
+        _ = Calendar.current
+        let grouped = Dictionary(grouping: transactions.filter { $0.isExpense }) {
+            $0.dateParsed.formatted(.dateTime.year().month())
+        }
 
+        let sortedKeys = grouped.keys.sorted {
+            $0.toMonthYearDate() ?? Date() < $1.toMonthYearDate() ?? Date()
+        }
+
+        return sortedKeys.map { key in
+            let total = grouped[key]?.reduce(0.0) { $0 - $1.signedAmount } ?? 0
+            return (key, total.roundedTo2Digits())
+        }
+    }
+
+   
 }
 

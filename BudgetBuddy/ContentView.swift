@@ -1,5 +1,5 @@
 import SwiftUI
-import SwiftUICharts
+import Charts 
 
 struct ContentView: View {
     @EnvironmentObject var transactionListVM: TransactionListViewModel
@@ -8,7 +8,7 @@ struct ContentView: View {
         NavigationView {
             ScrollView(.vertical, showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 24) {
-                    
+
                     // MARK: Title
                     Text("Overview")
                         .font(.title2)
@@ -16,34 +16,9 @@ struct ContentView: View {
 
                     MonthlyBudgetCard()
 
+                    // MARK: Monthly Expense Chart (using built-in Charts framework)
+                    MonthlyExpensesBarChart()
 
-                    // MARK: Chart
-                    let data = transactionListVM.accumulateTransactions()
-                    let totalExpenses = data.last?.1 ?? 0
-
-                    if !data.isEmpty {
-                        CardView {
-                            VStack(alignment: .leading) {
-                                ChartLabel(
-                                    totalExpenses.formatted(.currency(code: "USD")),
-                                    type: .title,
-                                    format: "$%.2f"
-                                )
-                                LineChart()
-                            }
-                            .padding(.top)
-                            .background(Color.appBackground)
-                        }
-                        .data(data)
-                        .chartStyle(
-                            ChartStyle(
-                                backgroundColor: Color.appBackground,
-                                foregroundColor: ColorGradient(Color.appIcon.opacity(0.4), Color.appIcon)
-                            )
-                        )
-                        .frame(height: 300)
-                    }
-                    
                     // MARK: Monthly Summary
                     MonthlySummaryView()
 
@@ -56,11 +31,18 @@ struct ContentView: View {
             .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // MARK: Notification Icon
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "bell.badge")
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color.appIcon, .primary)
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: CalendarScreen()) {
+                        Image(systemName: "calendar")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.appIcon, .primary)
+                    }
+
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gearshape")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.appIcon, .primary)
+                    }
                 }
             }
         }
