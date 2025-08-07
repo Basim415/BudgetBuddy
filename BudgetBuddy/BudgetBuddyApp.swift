@@ -9,8 +9,8 @@ import SwiftUI
 
 @main
 struct BudgetBuddyApp: App {
-    @StateObject var transactionListVM = TransactionListViewModel()
-    
+    @StateObject private var transactionListVM = TransactionListViewModel()
+
     var body: some Scene {
         WindowGroup {
             LaunchView()
@@ -18,4 +18,3 @@ struct BudgetBuddyApp: App {
         }
     }
 }
-
