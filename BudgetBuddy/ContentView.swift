@@ -1,5 +1,5 @@
 import SwiftUI
-import Charts 
+import Charts
 
 struct ContentView: View {
     @EnvironmentObject var transactionListVM: TransactionListViewModel
@@ -9,10 +9,20 @@ struct ContentView: View {
             ScrollView(.vertical, showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 24) {
 
-                    // MARK: Title
-                    Text("Overview")
-                        .font(.title2)
-                        .bold()
+                    // MARK: Title + "Your Insights" Link
+                    HStack {
+                        Text("Overview")
+                            .font(.title2)
+                            .bold()
+
+                        Spacer()
+
+                        NavigationLink(destination: InsightsView()) {
+                            Text("Your Insights")
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                        }
+                    }
 
                     MonthlyBudgetCard()
 

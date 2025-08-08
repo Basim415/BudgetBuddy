@@ -15,6 +15,15 @@ extension Color {
     static let systemBackground = Color(uiColor: .systemBackground)
 }
 
+
+extension ShapeStyle where Self == Color {
+    static var chartBarColor: Color {
+        Color("ChartBarColor", bundle: nil)
+    }
+}
+
+
+
 extension DateFormatter {
     static let allNumericUSA: DateFormatter = {
         print ("Intializing DateFormatter")
