@@ -2,107 +2,84 @@
 //  TransactionListViewModel.swift
 //  BudgetBuddy
 //
-//  Created by Basim Shahzad on 7/30/25.
-//
 
 import Foundation
-import Combine
-import Collections
 import SwiftUI
-import SwiftUICharts
+import Collections
 
 enum ChartDisplayType: String, CaseIterable {
     case line = "Line Chart"
-    case bar = "Bar Chart"
+    case bar  = "Bar Chart"
 }
 
-typealias TransactionGroup = [String: [Transaction]]
+typealias TransactionGroup     = [String: [Transaction]]
 typealias TransactionPrefixSum = [(String, Double)]
 
+// The ViewModel is now a lightweight helper for computed values and UI state.
+// It no longer owns or loads transactions — SwiftData views use @Query for that.
 final class TransactionListViewModel: ObservableObject {
     @Published var chartType: ChartDisplayType = .line
     @Published var searchText: String = ""
     @Published var selectedCategory: String? = nil
     @AppStorage("monthlyBudget") var monthlyBudget: Double = 1500.0
-    @Published var transactions: [Transaction] = []
-    
-    var filteredTransactions: [Transaction] {
-        transactions.filter { transaction in
-            // Filter by category if selected
-            let categoryMatch = selectedCategory == nil || transaction.category == selectedCategory
-            // Filter by search text if entered
-            let searchMatch = searchText.isEmpty || transaction.merchant.lowercased().contains(searchText.lowercased())
+
+    // MARK: - Filtering
+
+    func filtered(_ transactions: [Transaction]) -> [Transaction] {
+        transactions.filter { t in
+            let categoryMatch = selectedCategory == nil || t.category == selectedCategory
+            let searchMatch   = searchText.isEmpty || t.merchant.lowercased().contains(searchText.lowercased())
             return categoryMatch && searchMatch
         }
     }
-    
-    var currentMonthExpenseTotal: Double {
+
+    // MARK: - Aggregation helpers
+    // These take a [Transaction] passed in from the view (via @Query),
+    // so there's no stored array here anymore.
+
+    func currentMonthTotal(_ transactions: [Transaction]) -> Double {
         let currentMonth = Date().formatted(.dateTime.year().month(.wide))
         return transactions
             .filter { $0.month == currentMonth && $0.isExpense }
             .reduce(0) { $0 - $1.signedAmount }
     }
 
-    init() {
-        getTransactions()
+    func groupByMonth(_ transactions: [Transaction]) -> TransactionGroup {
+        Dictionary(grouping: transactions) { $0.month }
     }
 
-    func getTransactions() {
-        guard let url = Bundle.main.url(forResource: "transactions", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let transactions = try? JSONDecoder().decode([Transaction].self, from: data) else {
-            print("Failed to load transactions.")
-            return
-        }
-
-        self.transactions = transactions
-    }
-
-    func getTransactionByMonth() -> TransactionGroup {
-        guard !transactions.isEmpty else { return [:] }
-
-        let groupedTransactions = Dictionary(grouping: transactions) { $0.month }
-        return groupedTransactions
-    }
-    
-    func accumulateTransactions() -> TransactionPrefixSum {
+    func accumulateTransactions(_ transactions: [Transaction]) -> TransactionPrefixSum {
         guard !transactions.isEmpty else { return [] }
 
         let calendar = Calendar.current
-        let groupedTransactions = Dictionary(grouping: transactions.filter { $0.isExpense }) {
-            calendar.startOfDay(for: $0.dateParsed)
+        let grouped  = Dictionary(grouping: transactions.filter { $0.isExpense }) {
+            calendar.startOfDay(for: $0.date)
         }
 
-        let sortedDates = groupedTransactions.keys.sorted()
+        let sortedDates = grouped.keys.sorted()
         var sum: Double = .zero
-        var cumulativeSum: TransactionPrefixSum = []
+        var result: TransactionPrefixSum = []
 
         for date in sortedDates {
-            let dailyTotal = groupedTransactions[date]?.reduce(0) { $0 - $1.signedAmount } ?? 0
+            let dailyTotal = grouped[date]?.reduce(0) { $0 - $1.signedAmount } ?? 0
             sum += dailyTotal
-            sum = sum.roundedTo2Digits()
-            cumulativeSum.append((date.formatted(date: .abbreviated, time: .omitted), sum))
+            sum  = sum.roundedTo2Digits()
+            result.append((date.formatted(date: .abbreviated, time: .omitted), sum))
         }
 
-        return cumulativeSum
+        return result
     }
-    
-    func monthlyTotals() -> [(String, Double)] {
-        _ = Calendar.current
+
+    func monthlyTotals(_ transactions: [Transaction]) -> [(String, Double)] {
         let grouped = Dictionary(grouping: transactions.filter { $0.isExpense }) {
-            $0.dateParsed.formatted(.dateTime.year().month())
+            $0.date.formatted(.dateTime.year().month())
         }
 
-        let sortedKeys = grouped.keys.sorted {
-            $0.toMonthYearDate() ?? Date() < $1.toMonthYearDate() ?? Date()
-        }
-
-        return sortedKeys.map { key in
-            let total = grouped[key]?.reduce(0.0) { $0 - $1.signedAmount } ?? 0
-            return (key, total.roundedTo2Digits())
-        }
+        return grouped.keys
+            .sorted { $0.toMonthYearDate() ?? Date() < $1.toMonthYearDate() ?? Date() }
+            .map { key in
+                let total = grouped[key]?.reduce(0.0) { $0 - $1.signedAmount } ?? 0
+                return (key, total.roundedTo2Digits())
+            }
     }
-
-   
 }
-

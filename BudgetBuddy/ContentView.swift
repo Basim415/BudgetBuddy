@@ -1,22 +1,33 @@
+//
+//  ContentView.swift
+//  BudgetBuddy
+//
+
 import SwiftUI
+import SwiftData
 import Charts
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var transactionListVM: TransactionListViewModel
+
+    // @Query fetches all transactions from SwiftData, sorted newest first.
+    // The view automatically re-renders whenever the data changes.
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+
+    @State private var showingAddTransaction = false
 
     var body: some View {
         NavigationView {
             ScrollView(.vertical, showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 24) {
 
-                    // MARK: Title + "Your Insights" Link
+                    // MARK: Title + Insights link
                     HStack {
                         Text("Overview")
                             .font(.title2)
                             .bold()
-
                         Spacer()
-
                         NavigationLink(destination: InsightsView()) {
                             Text("Your Insights")
                                 .font(.title3)
@@ -24,16 +35,13 @@ struct ContentView: View {
                         }
                     }
 
-                    MonthlyBudgetCard()
+                    MonthlyBudgetCard(transactions: transactions)
 
-                    // MARK: Monthly Expense Chart (using built-in Charts framework)
-                    MonthlyExpensesBarChart()
+                    MonthlyExpensesBarChart(transactions: transactions)
 
-                    // MARK: Monthly Summary
-                    MonthlySummaryView()
+                    MonthlySummaryView(transactions: transactions)
 
-                    // MARK: Recent Transaction List
-                    RecentTransactionList()
+                    RecentTransactionList(transactions: transactions)
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
@@ -42,6 +50,15 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    // Add transaction button
+                    Button {
+                        showingAddTransaction = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.appIcon, .primary)
+                    }
+
                     NavigationLink(destination: CalendarScreen()) {
                         Image(systemName: "calendar")
                             .symbolRenderingMode(.palette)
@@ -55,24 +72,10 @@ struct ContentView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingAddTransaction) {
+                AddTransactionView()
+            }
         }
         .navigationViewStyle(.stack)
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static let transactionListVM: TransactionListViewModel = {
-        let vm = TransactionListViewModel()
-        vm.transactions = transactionListPreviewData
-        return vm
-    }()
-
-    static var previews: some View {
-        Group {
-            ContentView()
-            ContentView()
-                .preferredColorScheme(.dark)
-        }
-        .environmentObject(transactionListVM)
     }
 }

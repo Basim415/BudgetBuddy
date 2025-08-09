@@ -2,13 +2,11 @@
 //  MonthlySummaryView.swift
 //  BudgetBuddy
 //
-//  Created by Basim Shahzad on 8/4/25.
-//
 
 import SwiftUI
 
 struct MonthlySummaryView: View {
-    @EnvironmentObject var transactionListVM: TransactionListViewModel
+    let transactions: [Transaction]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -22,9 +20,7 @@ struct MonthlySummaryView: View {
                     Text(month)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-
                     Spacer()
-
                     Text(total, format: .currency(code: "USD"))
                         .bold()
                         .foregroundColor(.appText)
@@ -39,26 +35,10 @@ struct MonthlySummaryView: View {
     }
 
     private var sortedMonthlySums: [(key: String, value: Double)] {
-        let monthlyGroups = transactionListVM.getTransactionByMonth()
-
-        let totals = monthlyGroups.mapValues { transactions in
-            transactions
-                .filter { $0.isExpense }
-                .reduce(0) { $0 - $1.signedAmount }
+        let grouped = Dictionary(grouping: transactions.filter { $0.isExpense }) { $0.month }
+        let totals  = grouped.mapValues { txs in
+            txs.reduce(0) { $0 - $1.signedAmount }
         }
-
-        return totals
-            .sorted { $0.key.toMonthYearDate() ?? Date() > $1.key.toMonthYearDate() ?? Date() }
-    }
-}
-
-struct MonthlySummaryView_Previews: PreviewProvider {
-    static let transactionListVM = TransactionListViewModel()
-
-    static var previews: some View {
-        MonthlySummaryView()
-            .environmentObject(transactionListVM)
-            .padding()
-            .previewLayout(.sizeThatFits)
+        return totals.sorted { $0.key.toMonthYearDate() ?? Date() > $1.key.toMonthYearDate() ?? Date() }
     }
 }

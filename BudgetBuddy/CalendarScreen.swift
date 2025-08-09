@@ -2,18 +2,17 @@
 //  CalendarScreen.swift
 //  BudgetBuddy
 //
-//  Created by Basim Shahzad on 8/5/25.
-//
 
 import SwiftUI
+import SwiftData
 
 struct CalendarScreen: View {
-    @EnvironmentObject var transactionListVM: TransactionListViewModel
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @State private var selectedDate: Date = Date()
 
     private var transactionsForSelectedDate: [Transaction] {
-        transactionListVM.transactions.filter {
-            Calendar.current.isDate($0.dateParsed, inSameDayAs: selectedDate)
+        transactions.filter {
+            Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
     }
 

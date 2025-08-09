@@ -1,14 +1,22 @@
 import SwiftUI
 
 struct MonthlyBudgetCard: View {
-    @EnvironmentObject var transactionListVM: TransactionListViewModel
+    let transactions: [Transaction]
+    @AppStorage("monthlyBudget") private var monthlyBudget: Double = 1500.0
 
-    private let trackColor = Color(UIColor.tertiarySystemFill) // adaptive gray
+    private let trackColor = Color(UIColor.tertiarySystemFill)
+
+    private var spent: Double {
+        let currentMonth = Date().formatted(.dateTime.year().month(.wide))
+        return transactions
+            .filter { $0.month == currentMonth && $0.isExpense }
+            .reduce(0) { $0 - $1.signedAmount }
+    }
 
     var body: some View {
-        let budget = max(transactionListVM.monthlyBudget, 0.01) // avoid divide-by-zero
-        let spent  = max(transactionListVM.currentMonthExpenseTotal, 0)
-        let progress = min(spent / budget, 1.0)
+        let budget   = max(monthlyBudget, 0.01)
+        let spentAbs = max(spent, 0)
+        let progress = min(spentAbs / budget, 1.0)
 
         VStack(alignment: .leading, spacing: 16) {
             Text("Monthly Budget")
@@ -23,7 +31,7 @@ struct MonthlyBudgetCard: View {
                     Circle()
                         .trim(from: 0, to: progress)
                         .stroke(
-                            Color.accentColor, // or Color.appIcon if you have it
+                            Color.accentColor,
                             style: StrokeStyle(lineWidth: 10, lineCap: .round)
                         )
                         .rotationEffect(.degrees(-90))
@@ -36,7 +44,7 @@ struct MonthlyBudgetCard: View {
                 .frame(width: 60, height: 60)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Spent: \(spent, format: .currency(code: "USD"))")
+                    Text("Spent: \(spentAbs, format: .currency(code: "USD"))")
                         .font(.subheadline)
                         .foregroundStyle(.primary)
 
@@ -49,7 +57,7 @@ struct MonthlyBudgetCard: View {
             }
         }
         .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading) // <-- make card fill width
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(UIColor.secondarySystemBackground))
@@ -59,6 +67,5 @@ struct MonthlyBudgetCard: View {
                 .stroke(Color(UIColor.separator), lineWidth: 0.5)
         )
         .shadow(radius: 1, y: 1)
-        // .padding(.horizontal)  // <-- remove to match old full-width behavior
     }
 }

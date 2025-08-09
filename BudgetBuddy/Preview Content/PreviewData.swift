@@ -2,23 +2,12 @@ import Foundation
 import SwiftUI
 
 var transactionListPreviewData: [Transaction] = {
-    guard let url = Bundle.main.url(forResource: "transactions", withExtension: "json") else {
-        print("transactions.json not found in bundle.")
+    guard let url = Bundle.main.url(forResource: "transactions", withExtension: "json"),
+          let data = try? Data(contentsOf: url),
+          let items = try? JSONDecoder().decode([TransactionJSON].self, from: data)
+    else {
+        print("PreviewData: could not load transactions.json")
         return []
     }
-
-    guard let data = try? Data(contentsOf: url) else {
-        print("Failed to load data from transactions.json.")
-        return []
-    }
-
-    do {
-        let transactions = try JSONDecoder().decode([Transaction].self, from: data)
-        print("Successfully decoded \(transactions.count) transactions.")
-        return transactions
-    } catch {
-        print("Decoding error: \(error)")
-        return []
-    }
+    return items.map { $0.toTransaction() }
 }()
-

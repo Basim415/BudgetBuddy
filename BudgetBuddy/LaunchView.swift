@@ -2,10 +2,6 @@
 //  LaunchView.swift
 //  BudgetBuddy
 //
-//  Created by Basim Shahzad on 8/4/25.
-//
-
-import SwiftUI
 
 import SwiftUI
 
@@ -13,12 +9,10 @@ struct LaunchView: View {
     @State private var showLogin = false
     @State private var isAuthenticated = false
     @State private var needsPINSetup = false
-    @EnvironmentObject var transactionListVM: TransactionListViewModel
 
     var body: some View {
         if isAuthenticated {
             ContentView()
-                .environmentObject(transactionListVM)
         } else if needsPINSetup {
             PINSetupView(isAuthenticated: $isAuthenticated)
         } else if showLogin {

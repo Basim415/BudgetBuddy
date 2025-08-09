@@ -7,7 +7,7 @@ struct TransactionRow: View {
 
     var body: some View {
         HStack(spacing: 20) {
-            // MARK: Transaction Category Icon
+            // MARK: Category icon
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color.appIcon.opacity(0.3))
                 .frame(width: 44, height: 44)
@@ -16,30 +16,28 @@ struct TransactionRow: View {
                 }
 
             VStack(alignment: .leading, spacing: 6) {
-                // MARK: Transaction Merchant
                 Text(transaction.merchant)
                     .font(.subheadline)
                     .bold()
                     .lineLimit(1)
 
-                // MARK: Transaction Category
                 Text(transaction.category)
                     .font(.footnote)
                     .opacity(0.7)
                     .lineLimit(1)
 
-                // MARK: Transaction Date
-                Text(transaction.dateParsed, format: .dateTime.year().month().day())
+                // `date` is now a real Date — no more dateParsed needed
+                Text(transaction.date, format: .dateTime.year().month().day())
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
 
             Spacer()
 
-            // MARK: Transaction Amount
+            // `transactionType` replaces the old `type` property
             Text(transaction.signedAmount, format: .currency(code: "USD"))
                 .bold()
-                .foregroundColor(transaction.type == .credit ? Color.appText : .red)
+                .foregroundColor(transaction.transactionType == "credit" ? Color.appText : .red)
                 .padding(.vertical, 8)
         }
     }

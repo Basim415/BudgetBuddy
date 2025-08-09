@@ -2,25 +2,23 @@
 //  CategoryFilterView.swift
 //  BudgetBuddy
 //
-//  Created by Basim Shahzad on 8/4/25.
-//
 
 import SwiftUI
 
 struct CategoryFilterView: View {
     @EnvironmentObject var transactionListVM: TransactionListViewModel
+    let transactions: [Transaction]
 
     var categories: [String] {
-        let all = Set(transactionListVM.transactions.map { $0.category })
-        return Array(all).sorted()
+        Array(Set(transactions.map { $0.category })).sorted()
     }
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                Button(action: {
+                Button {
                     transactionListVM.selectedCategory = nil
-                }) {
+                } label: {
                     Text("All")
                         .padding(.horizontal)
                         .padding(.vertical, 8)
@@ -29,9 +27,9 @@ struct CategoryFilterView: View {
                 }
 
                 ForEach(categories, id: \.self) { category in
-                    Button(action: {
+                    Button {
                         transactionListVM.selectedCategory = category
-                    }) {
+                    } label: {
                         Text(category)
                             .padding(.horizontal)
                             .padding(.vertical, 8)
