@@ -19,7 +19,7 @@ struct ContentView: View {
 
                         NavigationLink(destination: InsightsView()) {
                             Text("Your Insights")
-                                .font(.subheadline)
+                                .font(.title3)
                                 .foregroundColor(.blue)
                         }
                     }

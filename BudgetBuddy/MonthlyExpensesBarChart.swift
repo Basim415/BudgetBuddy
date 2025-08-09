@@ -29,8 +29,8 @@ struct MonthlyExpensesBarChart: View {
     }
 
     var body: some View {
-        CardView {
-            VStack(alignment: .leading, spacing: 12) {
+        AdaptiveCard {
+            VStack(alignment: .leading, spacing: 16) { // more spacing
                 Text("Monthly Expense Breakdown")
                     .font(.headline)
                     .foregroundStyle(.primary)
@@ -42,15 +42,15 @@ struct MonthlyExpensesBarChart: View {
                 Chart {
                     if let selectedViewMonth {
                         RuleMark(x: .value("Selected Month", selectedViewMonth.date, unit: .month))
-                            .foregroundStyle(Color.appIcon.opacity(0.2))
+                            .foregroundStyle(Color.appIcon.opacity(0.25))
                             .annotation(position: .top) {
                                 VStack(spacing: 4) {
                                     Text(selectedViewMonth.date, format: .dateTime.month(.abbreviated))
                                         .font(.caption)
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                     Text("$\(selectedViewMonth.viewCount)")
                                         .font(.caption.bold())
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                 }
                                 .padding(6)
                                 .background(Color.appIcon)
@@ -70,25 +70,63 @@ struct MonthlyExpensesBarChart: View {
                         )
                     }
                 }
-                .frame(height: 180)
+                .frame(height: 200) // slightly taller chart
                 .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+
+                // Larger & brighter axis labels for readability
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .month)) {
+                    AxisMarks(values: .stride(by: .month)) { _ in
+                        AxisGridLine().foregroundStyle(.secondary.opacity(0.25))
+                        AxisTick().foregroundStyle(.secondary.opacity(0.6))
                         AxisValueLabel(format: .dateTime.month(.abbreviated))
-                        AxisGridLine()
+                            .foregroundStyle(.primary.opacity(0.85))
+                            .font(.callout) // bigger
                     }
                 }
                 .chartYAxis {
-                    AxisMarks {
-                        AxisGridLine()
+                    AxisMarks { _ in
+                        AxisGridLine().foregroundStyle(.secondary.opacity(0.25))
+                        AxisTick().foregroundStyle(.secondary.opacity(0.6))
                         AxisValueLabel()
+                            .foregroundStyle(.primary.opacity(0.85))
+                            .font(.callout) // bigger
                     }
                 }
+
+                // Let the card supply the background; keep the plot area clear
+                .chartPlotStyle { plot in
+                    plot.background(.clear)
+                }
             }
-            .padding(.top, 16)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .padding(.top, 20)        // more breathing room
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
+            .frame(minHeight: 260)     // overall bigger card
         }
+    }
+}
+
+// MARK: - Adaptive Rounded Card (Light/Dark safe, matches Monthly Summary card)
+struct AdaptiveCard<Content: View>: View {
+    private let content: Content
+    private let cornerRadius: CGFloat = 16
+
+    init(@ViewBuilder _ content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Color(UIColor.secondarySystemBackground)) // lighter, matching shade
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.08), radius: 8, y: 2)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
